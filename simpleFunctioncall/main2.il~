@@ -1,0 +1,10 @@
+addr 0x14 @asm "mov    %eax,0x18(%esp)"
+label pc_0x14
+mem:?u32 = mem:?u32 with [R_ESP:u32 + 0x18:u32, e_little]:u32 = R_EAX:u32
+addr 0x18 @asm "mov    0x18(%esp),%eax"
+label pc_0x18
+R_EAX:u32 = mem:?u32[R_ESP:u32 + 0x18:u32, e_little]:u32
+addr 0x1c @asm "mov    %eax,(%esp)"
+label pc_0x1c
+mem:?u32 = mem:?u32 with [R_ESP:u32, e_little]:u32 = R_EAX:u32
+

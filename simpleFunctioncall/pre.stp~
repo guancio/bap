@@ -1,0 +1,270 @@
+% free variables:
+R_EBP_0 : BITVECTOR(32);
+R_ESP_1 : BITVECTOR(32);
+freevar1_76 : BITVECTOR(32);
+mem_218 : ARRAY BITVECTOR(32) OF BITVECTOR(8);
+% end free variables.
+
+ASSERT(
+0bin1 =
+(LET R_ESP_97_0 = BVSUB(32, R_ESP_1,0hex00000004) IN
+(LET mem_221_1 =
+                  (LET tempval_220_2 = R_EBP_0 IN
+                  (LET tempmem_219_3 =
+                                        (mem_218 WITH [BVPLUS(32, R_ESP_97_0,
+                                                       0hex00000003)] := 
+                                        (tempval_220_2 >> 24)[7:0]) IN
+                  (LET tempmem_219_4 =
+                                        (tempmem_219_3 WITH [BVPLUS(32, 
+                                                             R_ESP_97_0,
+                                                             0hex00000002)] := 
+                                        (tempval_220_2 >> 16)[7:0]) IN
+                  (LET tempmem_219_5 =
+                                        (tempmem_219_4 WITH [BVPLUS(32, 
+                                                             R_ESP_97_0,
+                                                             0hex00000001)] := 
+                                        (tempval_220_2 >> 8)[7:0]) IN
+                  (LET tempmem_219_6 =
+                                        (tempmem_219_5 WITH [BVPLUS(32, 
+                                                             R_ESP_97_0,
+                                                             0hex00000000)] := 
+                                        tempval_220_2[7:0]) IN
+                  tempmem_219_6))))) IN
+(LET R_ESP_100_7 = (R_ESP_97_0&0hexfffffff0) IN
+(LET R_ESP_123_8 = BVSUB(32, R_ESP_100_7,0hex00000020) IN
+(LET R_EAX_152_9 =
+                    (LET loadnorm_222_10 = mem_221_1 IN
+                    ((((0bin000000000000000000000000 @ loadnorm_222_10[
+                                                       BVPLUS(32, BVPLUS(32, 
+                                                                  R_ESP_97_0,
+                                                                  0hex00000008),
+                                                       0hex00000000)])|
+                      (((0bin000000000000000000000000 @ loadnorm_222_10[
+                                                        BVPLUS(32, BVPLUS(32, 
+                                                                   R_ESP_97_0,
+                                                                   0hex00000008),
+                                                        0hex00000001)]) << 8)[31:0]))|
+                     (((0bin000000000000000000000000 @ loadnorm_222_10[
+                                                       BVPLUS(32, BVPLUS(32, 
+                                                                  R_ESP_97_0,
+                                                                  0hex00000008),
+                                                       0hex00000002)]) << 16)[31:0]))|
+                    (((0bin000000000000000000000000 @ loadnorm_222_10[
+                                                      BVPLUS(32, BVPLUS(32, 
+                                                                 R_ESP_97_0,
+                                                                 0hex00000008),
+                                                      0hex00000003)]) << 24)[31:0])))
+                    IN
+(LET R_EAX_154_11 = BVPLUS(32, R_EAX_152_9,0hex00000001) IN
+(LET temp_183_12 = BVPLUS(32, R_ESP_123_8,0hex0000001c) IN
+(LET mem_225_13 =
+                   (LET tempval_224_14 = R_EAX_154_11 IN
+                   (LET tempmem_223_15 =
+                                          (mem_221_1 WITH [BVPLUS(32, 
+                                                           temp_183_12,
+                                                           0hex00000003)] := 
+                                          (tempval_224_14 >> 24)[7:0]) IN
+                   (LET tempmem_223_16 =
+                                          (tempmem_223_15 WITH [BVPLUS(32, 
+                                                                temp_183_12,
+                                                                0hex00000002)] := 
+                                          (tempval_224_14 >> 16)[7:0]) IN
+                   (LET tempmem_223_17 =
+                                          (tempmem_223_16 WITH [BVPLUS(32, 
+                                                                temp_183_12,
+                                                                0hex00000001)] := 
+                                          (tempval_224_14 >> 8)[7:0]) IN
+                   (LET tempmem_223_18 =
+                                          (tempmem_223_17 WITH [BVPLUS(32, 
+                                                                temp_183_12,
+                                                                0hex00000000)] := 
+                                          tempval_224_14[7:0]) IN
+                   tempmem_223_18))))) IN
+(LET R_EAX_186_19 =
+                     (LET loadnorm_226_20 = mem_225_13 IN
+                     ((((0bin000000000000000000000000 @ loadnorm_226_20[
+                                                        BVPLUS(32, temp_183_12,
+                                                        0hex00000000)])|
+                       (((0bin000000000000000000000000 @ loadnorm_226_20[
+                                                         BVPLUS(32, temp_183_12,
+                                                         0hex00000001)]) << 8)[31:0]))|
+                      (((0bin000000000000000000000000 @ loadnorm_226_20[
+                                                        BVPLUS(32, temp_183_12,
+                                                        0hex00000002)]) << 16)[31:0]))|
+                     (((0bin000000000000000000000000 @ loadnorm_226_20[
+                                                       BVPLUS(32, temp_183_12,
+                                                       0hex00000003)]) << 24)[31:0])))
+                     IN
+(LET mem_229_21 =
+                   (LET tempval_228_22 = R_EAX_186_19 IN
+                   (LET tempmem_227_23 =
+                                          (mem_225_13 WITH [BVPLUS(32, 
+                                                            R_ESP_123_8,
+                                                            0hex00000003)] := 
+                                          (tempval_228_22 >> 24)[7:0]) IN
+                   (LET tempmem_227_24 =
+                                          (tempmem_227_23 WITH [BVPLUS(32, 
+                                                                R_ESP_123_8,
+                                                                0hex00000002)] := 
+                                          (tempval_228_22 >> 16)[7:0]) IN
+                   (LET tempmem_227_25 =
+                                          (tempmem_227_24 WITH [BVPLUS(32, 
+                                                                R_ESP_123_8,
+                                                                0hex00000001)] := 
+                                          (tempval_228_22 >> 8)[7:0]) IN
+                   (LET tempmem_227_26 =
+                                          (tempmem_227_25 WITH [BVPLUS(32, 
+                                                                R_ESP_123_8,
+                                                                0hex00000000)] := 
+                                          tempval_228_22[7:0]) IN
+                   tempmem_227_26))))) IN
+(LET abs1param_188_27 =
+                         (LET loadnorm_230_28 = mem_229_21 IN
+                         ((((0bin000000000000000000000000 @ loadnorm_230_28[
+                                                            BVPLUS(32, 
+                                                            R_ESP_123_8,
+                                                            0hex00000000)])|
+                           (((0bin000000000000000000000000 @ loadnorm_230_28[
+                                                             BVPLUS(32, 
+                                                             R_ESP_123_8,
+                                                             0hex00000001)]) << 8)[31:0]))|
+                          (((0bin000000000000000000000000 @ loadnorm_230_28[
+                                                            BVPLUS(32, 
+                                                            R_ESP_123_8,
+                                                            0hex00000002)]) << 16)[31:0]))|
+                         (((0bin000000000000000000000000 @ loadnorm_230_28[
+                                                           BVPLUS(32, 
+                                                           R_ESP_123_8,
+                                                           0hex00000003)]) << 24)[31:0])))
+                         IN
+(LET abs1pre_189_29 =
+                       IF (BVSLT(0hex80000000,
+                       abs1param_188_27)) THEN 0bin1 ELSE 0bin0 ENDIF IN
+(LET abs1post_190_30 =
+                        IF (BVSLE(0hex00000000,
+                        freevar1_76)) THEN 0bin1 ELSE 0bin0 ENDIF IN
+(LET R_ESP_195_31 = BVSUB(32, R_ESP_123_8,0hex00000004) IN
+(LET mem_233_32 =
+                   (LET tempval_232_33 = 0hex0000001f IN
+                   (LET tempmem_231_34 =
+                                          (mem_229_21 WITH [BVPLUS(32, 
+                                                            R_ESP_195_31,
+                                                            0hex00000003)] := 
+                                          (tempval_232_33 >> 24)[7:0]) IN
+                   (LET tempmem_231_35 =
+                                          (tempmem_231_34 WITH [BVPLUS(32, 
+                                                                R_ESP_195_31,
+                                                                0hex00000002)] := 
+                                          (tempval_232_33 >> 16)[7:0]) IN
+                   (LET tempmem_231_36 =
+                                          (tempmem_231_35 WITH [BVPLUS(32, 
+                                                                R_ESP_195_31,
+                                                                0hex00000001)] := 
+                                          (tempval_232_33 >> 8)[7:0]) IN
+                   (LET tempmem_231_37 =
+                                          (tempmem_231_36 WITH [BVPLUS(32, 
+                                                                R_ESP_195_31,
+                                                                0hex00000000)] := 
+                                          tempval_232_33[7:0]) IN
+                   tempmem_231_37))))) IN
+(LET temp_197_38 = BVPLUS(32, R_ESP_195_31,0hex0000001c) IN
+(LET mem_77_236_39 =
+                      (LET tempval_235_40 = freevar1_76 IN
+                      (LET tempmem_234_41 =
+                                             (mem_233_32 WITH [BVPLUS(32, 
+                                                               temp_197_38,
+                                                               0hex00000003)] := 
+                                             (tempval_235_40 >> 24)[7:0]) IN
+                      (LET tempmem_234_42 =
+                                             (tempmem_234_41 WITH [BVPLUS(32, 
+                                                                   temp_197_38,
+                                                                   0hex00000002)] := 
+                                             (tempval_235_40 >> 16)[7:0]) IN
+                      (LET tempmem_234_43 =
+                                             (tempmem_234_42 WITH [BVPLUS(32, 
+                                                                   temp_197_38,
+                                                                   0hex00000001)] := 
+                                             (tempval_235_40 >> 8)[7:0]) IN
+                      (LET tempmem_234_44 =
+                                             (tempmem_234_43 WITH [BVPLUS(32, 
+                                                                   temp_197_38,
+                                                                   0hex00000000)] := 
+                                             tempval_235_40[7:0]) IN
+                      tempmem_234_44))))) IN
+(LET temp_79_199_45 =
+                       (LET loadnorm_237_46 = mem_77_236_39 IN
+                       ((((0bin000000000000000000000000 @ loadnorm_237_46[
+                                                          BVPLUS(32, 
+                                                          temp_197_38,
+                                                          0hex00000000)])|
+                         (((0bin000000000000000000000000 @ loadnorm_237_46[
+                                                           BVPLUS(32, 
+                                                           temp_197_38,
+                                                           0hex00000001)]) << 8)[31:0]))|
+                        (((0bin000000000000000000000000 @ loadnorm_237_46[
+                                                          BVPLUS(32, 
+                                                          temp_197_38,
+                                                          0hex00000002)]) << 16)[31:0]))|
+                       (((0bin000000000000000000000000 @ loadnorm_237_46[
+                                                         BVPLUS(32, temp_197_38,
+                                                         0hex00000003)]) << 24)[31:0])))
+                       IN
+(LET t_71_200_47 = BVSUB(32, temp_79_199_45,0hex7fffffff) IN
+(LET R_ZF_201_48 = IF (0hex00000000=t_71_200_47) THEN 0bin1 ELSE 0bin0 ENDIF IN
+(LET temp_203_49 = ~(R_ZF_201_48) IN
+(LET goal_205_50 =
+                    IF (BVSLE(0hex00000001,
+                    temp_79_199_45)) THEN 0bin1 ELSE 0bin0 ENDIF IN
+(LET mem_138_240_51 =
+                       (LET tempval_239_52 =
+                                              BVPLUS(32, temp_79_199_45,
+                                              0hex00000001) IN
+                       (LET tempmem_238_53 =
+                                              (mem_77_236_39 WITH [BVPLUS(32, 
+                                                                   temp_197_38,
+                                                                   0hex00000003)] := 
+                                              (tempval_239_52 >> 24)[7:0]) IN
+                       (LET tempmem_238_54 =
+                                              (tempmem_238_53 WITH [BVPLUS(32, 
+                                                                    temp_197_38,
+                                                                    0hex00000002)] := 
+                                              (tempval_239_52 >> 16)[7:0]) IN
+                       (LET tempmem_238_55 =
+                                              (tempmem_238_54 WITH [BVPLUS(32, 
+                                                                    temp_197_38,
+                                                                    0hex00000001)] := 
+                                              (tempval_239_52 >> 8)[7:0]) IN
+                       (LET tempmem_238_56 =
+                                              (tempmem_238_55 WITH [BVPLUS(32, 
+                                                                    temp_197_38,
+                                                                    0hex00000000)] := 
+                                              tempval_239_52[7:0]) IN
+                       tempmem_238_56))))) IN
+(LET R_EAX_125_212_57 =
+                         (LET loadnorm_241_58 = mem_138_240_51 IN
+                         ((((0bin000000000000000000000000 @ loadnorm_241_58[
+                                                            BVPLUS(32, 
+                                                            temp_197_38,
+                                                            0hex00000000)])|
+                           (((0bin000000000000000000000000 @ loadnorm_241_58[
+                                                             BVPLUS(32, 
+                                                             temp_197_38,
+                                                             0hex00000001)]) << 8)[31:0]))|
+                          (((0bin000000000000000000000000 @ loadnorm_241_58[
+                                                            BVPLUS(32, 
+                                                            temp_197_38,
+                                                            0hex00000002)]) << 16)[31:0]))|
+                         (((0bin000000000000000000000000 @ loadnorm_241_58[
+                                                           BVPLUS(32, 
+                                                           temp_197_38,
+                                                           0hex00000003)]) << 24)[31:0])))
+                         IN
+(LET goal_213_59 =
+                    IF (BVSLE(0hex00000001,
+                    R_EAX_125_212_57)) THEN 0bin1 ELSE 0bin0 ENDIF IN
+(LET wp3_191_60 = ((temp_203_49|goal_205_50)&(~(temp_203_49)|goal_213_59)) IN
+(LET wp2_217_61 = (abs1pre_189_29&(~(abs1post_190_30)|wp3_191_60)) IN
+wp2_217_61)))))))))))))))))))))))))))
+);
+QUERY(FALSE);
+COUNTEREXAMPLE;

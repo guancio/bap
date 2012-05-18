@@ -1,0 +1,14 @@
+% free variables:
+R_EBP_0 : BITVECTOR(32);
+R_EAX_5 : BITVECTOR(32);
+
+x : BITVECTOR(32);
+
+ASSERT(
+  R_EAX_5 = 0x00000002
+);
+ASSERT(
+  x = BVMULT(32, R_EBP_0, R_EAX_5)
+);
+QUERY(x = R_EBP_0);
+COUNTEREXAMPLE;

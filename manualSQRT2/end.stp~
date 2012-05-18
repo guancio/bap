@@ -1,0 +1,66 @@
+% free variables:
+R_EBP_0 : BITVECTOR(32);
+mem_91 : ARRAY BITVECTOR(32) OF BITVECTOR(8);
+% end free variables.
+
+ASSERT(
+0bin1 =
+(LET R_EAX_74_0 =
+                   (LET loadnorm_92_1 = mem_91 IN
+                   ((((0bin000000000000000000000000 @ loadnorm_92_1[BVPLUS(32, 
+                                                                    BVPLUS(32, 
+                                                                    R_EBP_0,
+                                                                    0hexfffffff8),
+                                                                    0hex00000000)])|
+                     (((0bin000000000000000000000000 @ loadnorm_92_1[
+                                                       BVPLUS(32, BVPLUS(32, 
+                                                                  R_EBP_0,
+                                                                  0hexfffffff8),
+                                                       0hex00000001)]) << 8)[31:0]))|
+                    (((0bin000000000000000000000000 @ loadnorm_92_1[BVPLUS(32, 
+                                                                    BVPLUS(32, 
+                                                                    R_EBP_0,
+                                                                    0hexfffffff8),
+                                                                    0hex00000002)]) << 16)[31:0]))|
+                   (((0bin000000000000000000000000 @ loadnorm_92_1[BVPLUS(32, 
+                                                                   BVPLUS(32, 
+                                                                   R_EBP_0,
+                                                                   0hexfffffff8),
+                                                                   0hex00000003)]) << 24)[31:0])))
+                   IN
+(LET R_ESP_77_2 = BVPLUS(32, R_EBP_0,0hex00000004) IN
+(LET R_ESP_79_3 = BVPLUS(32, R_ESP_77_2,0hex00000004) IN
+(LET temp_82_4 =
+                  (LET loadnorm_93_5 = mem_91 IN
+                  ((((0bin000000000000000000000000 @ loadnorm_93_5[BVPLUS(32, 
+                                                                   BVPLUS(32, 
+                                                                   R_ESP_79_3,
+                                                                   0hex00000008),
+                                                                   0hex00000000)])|
+                    (((0bin000000000000000000000000 @ loadnorm_93_5[BVPLUS(32, 
+                                                                    BVPLUS(32, 
+                                                                    R_ESP_79_3,
+                                                                    0hex00000008),
+                                                                    0hex00000001)]) << 8)[31:0]))|
+                   (((0bin000000000000000000000000 @ loadnorm_93_5[BVPLUS(32, 
+                                                                   BVPLUS(32, 
+                                                                   R_ESP_79_3,
+                                                                   0hex00000008),
+                                                                   0hex00000002)]) << 16)[31:0]))|
+                  (((0bin000000000000000000000000 @ loadnorm_93_5[BVPLUS(32, 
+                                                                  BVPLUS(32, 
+                                                                  R_ESP_79_3,
+                                                                  0hex00000008),
+                                                                  0hex00000003)]) << 24)[31:0])))
+                  IN
+(LET temp_86_6 = BVPLUS(32, R_EAX_74_0,0hex00000001) IN
+(LET goal_90_7 =
+                  (IF (BVSLE(BVMULT(32, R_EAX_74_0,R_EAX_74_0),
+                   temp_82_4)) THEN 0bin1 ELSE 0bin0 ENDIF&
+                  IF (BVSLT(temp_82_4,
+                  BVMULT(32, temp_86_6,temp_86_6))) THEN 0bin1 ELSE 0bin0 ENDIF)
+                  IN
+goal_90_7))))))
+);
+QUERY(FALSE);
+COUNTEREXAMPLE;

@@ -1,0 +1,71 @@
+addr 0x0 @asm "push   %ebp"
+label pc_0x0
+t:u32 = R_EBP:u32
+R_ESP:u32 = R_ESP:u32 - 4:u32
+mem:?u32 = mem:?u32 with [R_ESP:u32, e_little]:u32 = t:u32
+addr 0x1 @asm "mov    %esp,%ebp"
+label pc_0x1
+R_EBP:u32 = R_ESP:u32
+addr 0x3 @asm "sub    $0x10,%esp"
+label pc_0x3
+t_69:u32 = R_ESP:u32
+R_ESP:u32 = R_ESP:u32 - 0x10:u32
+R_CF:bool = t_69:u32 < 0x10:u32
+R_AF:bool = 0x10:u32 == (0x10:u32 & (R_ESP:u32 ^ t_69:u32 ^ 0x10:u32))
+R_OF:bool = high:bool((t_69:u32 ^ 0x10:u32) & (t_69:u32 ^ R_ESP:u32))
+R_PF:bool =
+  ~low:bool(R_ESP:u32 >> 7:u32 ^ R_ESP:u32 >> 6:u32 ^ R_ESP:u32 >> 5:u32 ^
+            R_ESP:u32 >> 4:u32 ^ R_ESP:u32 >> 3:u32 ^ R_ESP:u32 >> 2:u32 ^
+            R_ESP:u32 >> 1:u32 ^ R_ESP:u32)
+R_SF:bool = high:bool(R_ESP:u32)
+R_ZF:bool = 0:u32 == R_ESP:u32
+addr 0x6 @asm "movl   $0x0,-0x8(%ebp)"
+label pc_0x6
+mem:?u32 = mem:?u32 with [R_EBP:u32 + -8:u32, e_little]:u32 = 0:u32
+addr 0xd @asm "mov    -0x8(%ebp),%eax"
+label pc_0xd
+R_EAX:u32 = mem:?u32[R_EBP:u32 + -8:u32, e_little]:u32
+addr 0x10 @asm "lea    0x1(%eax),%edx"
+label pc_0x10
+R_EDX:u32 = R_EAX:u32 + 1:u32
+addr 0x13 @asm "mov    -0x8(%ebp),%eax"
+label pc_0x13
+R_EAX:u32 = mem:?u32[R_EBP:u32 + -8:u32, e_little]:u32
+addr 0x16 @asm "add    $0x1,%eax"
+label pc_0x16
+t_70:u32 = R_EAX:u32
+R_EAX:u32 = R_EAX:u32 + 1:u32
+R_CF:bool = R_EAX:u32 < t_70:u32
+R_AF:bool = 0x10:u32 == (0x10:u32 & (R_EAX:u32 ^ t_70:u32 ^ 1:u32))
+R_OF:bool = high:bool((t_70:u32 ^ -2:u32) & (t_70:u32 ^ R_EAX:u32))
+R_PF:bool =
+  ~low:bool(R_EAX:u32 >> 7:u32 ^ R_EAX:u32 >> 6:u32 ^ R_EAX:u32 >> 5:u32 ^
+            R_EAX:u32 >> 4:u32 ^ R_EAX:u32 >> 3:u32 ^ R_EAX:u32 >> 2:u32 ^
+            R_EAX:u32 >> 1:u32 ^ R_EAX:u32)
+R_SF:bool = high:bool(R_EAX:u32)
+R_ZF:bool = 0:u32 == R_EAX:u32
+addr 0x19 @asm "imul   %edx,%eax"
+label pc_0x19
+T_32t1:u32 = R_EAX:u32
+T_32t0:u32 = R_EDX:u32
+T_32t2:u32 = T_32t0:u32 * T_32t1:u32
+R_EAX:u32 = T_32t2:u32
+/*eflags thunk: smul*/
+T_0:u64 = extend:u64(low:u32(T_32t0:u32)) * extend:u64(low:u32(T_32t1:u32))
+T_1:u32 = low:u32(T_0:u64)
+T_2:u32 = high:u32(T_0:u64)
+R_CF:bool = T_2:u32 <> T_1:u32 $>> 0x1f:u32
+T_3:u8 = low:u8(T_0:u64)
+R_PF:bool =
+  ~low:bool(T_3:u8 >> 7:u8 ^ T_3:u8 >> 6:u8 ^
+            (T_3:u8 >> 5:u8 ^ T_3:u8 >> 4:u8) ^
+            (T_3:u8 >> 3:u8 ^ T_3:u8 >> 2:u8 ^ (T_3:u8 >> 1:u8 ^ T_3:u8)))
+R_AF:bool = false
+R_ZF:bool = T_1:u32 == 0:u32
+R_SF:bool = low:bool(T_1:u32 >> 0x1f:u32)
+R_OF:bool = R_CF:bool
+addr 0x1c @asm "mov    %eax,-0x4(%ebp)"
+label pc_0x1c
+mem:?u32 = mem:?u32 with [R_EBP:u32 + -4:u32, e_little]:u32 = R_EAX:u32
+
+goal:bool = mem:?u32[R_EBP + -8:u32, e_little]:u32 $>= 0:u32

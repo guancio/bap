@@ -1,0 +1,6 @@
+// pre: x > max_neg_int
+int main(int x) {
+  int y = abs(x);
+  return sqrt(y);
+}
+// post: r >= 0 & r*r*r*r <= x*x

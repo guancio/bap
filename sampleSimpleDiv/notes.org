@@ -1,0 +1,45 @@
+* Example using a simple division
+** BAP location
+/home/guancio/Downloads/bap-0.4/utils
+** Compiling to IL
+~/Downloads/bap-0.4/utils/toil -bin test.o -o test.il
+
+
+
+addr 0x0 @asm "idivl  0x18(%ebp)"
+label pc_0x0
+T_32t6:u32 = R_EBP:u32 // %ebp
+T_32t5:u32 = T_32t6:u32 + 0x18:u32 // %ebp+0x18
+T_32t2:u32 = mem:?u32[T_32t5:u32, e_little]:u32 // m[%ebp+0x18]
+T_32t8:u32 = R_EAX:u32 // %eax
+T_32t9:u32 = R_EDX:u32 // %edx
+T_64t7:u64 = pad:u64(T_32t9:u32) << 0x20:u64 | pad:u64(T_32t8:u32) // <%edx,%eax>
+T_64t4:u64 =
+  T_64t7:u64 $% extend:u64(T_32t2:u32) << 0x20:u64 & 0xffffffff00000000:u64 |
+  T_64t7:u64 $/ extend:u64(T_32t2:u32) & 0xffffffff:u64 // <<%edx,%eax> mod m[%ebp+0x18], <%edx,%eax> div m[%ebp+0x18]>
+T_32t10:u32 = low:u32(T_64t4:u64) // <%edx,%eax> div m[%ebp+0x18]
+R_EAX:u32 = T_32t10:u32 // <%edx,%eax> div m[%ebp+0x18]
+T_32t11:u32 = high:u32(T_64t4:u64) // <%edx,%eax> mod m[%ebp+0x18]
+R_EDX:u32 = T_32t11:u32 // <%edx,%eax> mod m[%ebp+0x18]
+
+** Computing Weakest Precondition
+~/Downloads/bap-0.4/utils/topredicate -il test.il  -post goal
+
+** Executing STP
+export PATH=.:$PATH
+~/Downloads/bap-0.4/utils/topredicate -il test.il -stp-out out.stp -post goal
+
+
+~/Downloads/bap-0.4/utils/topredicate -il test.il  -post 'T_32t6:u32==1:u32'
+~/Downloads/bap-0.4/utils/topredicate -il test.il -stp-out out.stp -post 'T_32t6:u32==1:u32'
+
+
+** SQRT using BEP
+File: sqrt.c
+arm-none-eabi-gcc -mcpu=strongarm -g -c sqrt.c -o sqrt.o
+~/Downloads/bap-0.4/utils/il -bin sqrt.o -o sqrt.il
+
+
+arm-none-eabi-as -mcpu=strongarm -g sqrt.s -o sqrt.o
+
+post (return * return) <= x and (r+1)(r+1) > x 

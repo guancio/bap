@@ -1,0 +1,37 @@
+R_EBP_0 : BITVECTOR(32);
+mem_276 : ARRAY BITVECTOR(32) OF BITVECTOR(8);
+
+ASSERT(
+ LET yaddr = BVPLUS(32, R_EBP_0, ~0hex00000007) IN
+(LET sqaddr = BVPLUS(32, R_EBP_0, ~0hex00000003) IN
+(LET xaddr = BVPLUS(32, R_EBP_0, 0hex00000008) IN
+(
+BVSLT(mem_276[sqaddr], mem_276[xaddr]) AND
+BVSLT(mem_276[yaddr], 0hex7F) AND
+
+BVSLE(0bin00000000, mem_276[yaddr]) AND
+
+BVSLE(0hex00000000, yaddr) AND
+BVSLE(0hex00000000, xaddr) AND
+BVSLE(0hex00000000, sqaddr) AND
+TRUE
+)
+)));
+
+QUERY (
+ LET yaddr = BVPLUS(32, R_EBP_0, ~0hex00000007) IN
+(LET sqaddr = BVPLUS(32, R_EBP_0, ~0hex00000003) IN
+(LET y = mem_276[yaddr] IN
+(LET y1 = BVPLUS(8, y, 0hex01) IN
+(LET mem1 = mem_276 WITH [yaddr] := y1 IN
+
+(LET R_EDX_161_9 = BVPLUS(8, mem_276[yaddr], 0hex01) IN
+(LET T_32t2_82_197_11 = BVMULT(8, R_EDX_161_9,R_EDX_161_9) IN
+(LET mem2 = mem1 WITH [sqaddr] := T_32t2_82_197_11 IN
+
+BVSLE(0bin00000000, mem2[yaddr])
+
+))
+)
+)))));
+COUNTEREXAMPLE;

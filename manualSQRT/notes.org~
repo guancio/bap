@@ -1,0 +1,53 @@
+* Checking SQRT loop invariant
+1) sqrt.c is the whole source
+2) sqrt.o is the compiled assempler
+3) sqrt.il is the IL lift
+** Separate the body of the while from the rest
+Two strategies: separate (manually) the assemply or separate
+the IL
+
+We choose to separate the IL
+
+the file body.il contains the while IL body
+(from 0x21 to 0x3a)
+
+** Define the loop invariant IL
+{C and I} Body {I}
+Where C is the loop condition
+
+I = y >= 0
+
+Who is y in the assemply? Since it is not optimized
+y is the memory at position -0x8(%ebp)
+So the invariant is
+mem:?u32[R_EBP:u32 + -8:u32, e_little]:u32 >= 0:u32
+
+To avoid problems with reassigment in the memory
+We use a ghost variable at the end of the while body
+
+goal:bool = mem:?u32[R_EBP:u32 + -8:u32, e_little]:u32 >= 0:u32
+
+We evaluate the wekest precondition of the invariant
+
+~/Downloads/bap-0.4/utils/topredicate -il body.il -post goal
+
+To obtain the STP
+
+~/Downloads/bap-0.4/utils/topredicate -il body.il -stp-out body.stp -post goal
+
+** Proving the invariant
+We need to prove that I and C => WP
+in STP ths is done
+
+assert(I and C)
+query(WP)
+
+The code is inside ilproof.stp
+
+Since we are in a non optimzed assemply we assume that all C variables are stored into
+memory
+
+sq is in -0x4(%ebp)
+y is in -0x8(%ebp)
+x is 0x8(%ebp)
+

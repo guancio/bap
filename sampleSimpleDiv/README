@@ -1,0 +1,10 @@
+This is similar to the version of STP which was submitted to the SMTCOMP 2011.
+
+It:
+* Is based on r1368 from STP's subversion repository.
+* Is statically compiled for a 64-bit Linux computer.
+* Creates an always-interactive yacc parser, rather then the standard parser. This means it can be sent some of the SMTLIB2 control language. Without this option the parser buffers input.
+* Has a special encoding of multiplication that is better for hard problems. Hard problems taking say > 50 seconds to solve. To get the "standard" behaviour, use the --config_multiplication_variant=3 command line option.
+
+Trevor Hansen
+12-July-2011

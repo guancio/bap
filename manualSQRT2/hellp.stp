@@ -1,0 +1,13 @@
+% free variables:
+R_ESP_1 : BITVECTOR(32);
+hello_72 : BITVECTOR(32);
+% end free variables.
+
+ASSERT(
+0bin1 =
+(LET R_ESP_74_0 = BVSUB(32, R_ESP_1,0hex00000004) IN
+(LET goal_76_1 = IF (BVSLT(R_ESP_74_0,hello_72)) THEN 0bin1 ELSE 0bin0 ENDIF IN
+goal_76_1))
+);
+QUERY(FALSE);
+COUNTEREXAMPLE;

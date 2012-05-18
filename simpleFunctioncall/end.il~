@@ -1,0 +1,42 @@
+addr 0x1f @asm "mov    %eax,0x1c(%esp)"
+label pc_0x1f
+mem:?u32 = mem:?u32 with [R_ESP:u32 + 0x1c:u32, e_little]:u32 = R_EAX:u32
+addr 0x23 @asm "addl   $0x1,0x1c(%esp)"
+label pc_0x23
+t_71:u32 = mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32
+mem:?u32 =
+  mem:?u32 with [R_ESP:u32 + 0x1c:u32, e_little]:u32 =
+  mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32 + 1:u32
+R_CF:bool = mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32 < t_71:u32
+R_AF:bool =
+  0x10:u32 ==
+  (0x10:u32 &
+  (mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32 ^ t_71:u32 ^ 1:u32))
+R_OF:bool =
+  high:bool((t_71:u32 ^ -2:u32) &
+            (t_71:u32 ^ mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32))
+R_PF:bool =
+  ~low:bool(mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32 >> 7:u32 ^
+            mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32 >> 6:u32 ^
+            mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32 >> 5:u32 ^
+            mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32 >> 4:u32 ^
+            mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32 >> 3:u32 ^
+            mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32 >> 2:u32 ^
+            mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32 >> 1:u32 ^
+            mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32)
+R_SF:bool = high:bool(mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32)
+R_ZF:bool = 0:u32 == mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32
+addr 0x28 @asm "mov    0x1c(%esp),%eax"
+label pc_0x28
+R_EAX:u32 = mem:?u32[R_ESP:u32 + 0x1c:u32, e_little]:u32
+addr 0x2c @asm "leave  "
+label pc_0x2c
+R_ESP:u32 = R_EBP:u32
+R_EBP:u32 = mem:?u32[R_ESP:u32, e_little]:u32
+R_ESP:u32 = R_ESP:u32 + 4:u32
+addr 0x2d @asm "ret    "
+label pc_0x2d
+ra:u32 = mem:?u32[R_ESP:u32, e_little]:u32
+R_ESP:u32 = R_ESP:u32 + 4:u32
+
+goal:bool = R_EAX:u32 $>= 1:u32

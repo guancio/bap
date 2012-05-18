@@ -1,0 +1,14 @@
+addr 0x48 @asm "mov    -0x8(%ebp),%eax"
+label pc_0x48
+R_EAX:u32 = mem:?u32[R_EBP:u32 + -8:u32, e_little]:u32
+addr 0x4b @asm "leave  "
+label pc_0x4b
+R_ESP:u32 = R_EBP:u32
+R_EBP:u32 = mem:?u32[R_ESP:u32, e_little]:u32
+R_ESP:u32 = R_ESP:u32 + 4:u32
+addr 0x4c @asm "ret    "
+label pc_0x4c
+ra:u32 = mem:?u32[R_ESP:u32, e_little]:u32
+R_ESP:u32 = R_ESP:u32 + 4:u32
+
+goal:bool = (R_EAX:u32*R_EAX:u32) $<=  mem:?u32[R_ESP:u32+8:u32, e_little]:u32 & ((R_EAX:u32+1:u32)*(R_EAX:u32+1:u32)) $>  mem:?u32[R_ESP:u32+8:u32, e_little]:u32

@@ -1,0 +1,18 @@
+goal:bool = false
+addr 0x0 @asm "idivl  0x18(%ebp)"
+label pc_0x0
+T_32t6:u32 = R_EBP:u32
+T_32t5:u32 = T_32t6:u32 + 0x18:u32
+T_32t2:u32 = mem:?u32[T_32t5:u32, e_little]:u32
+T_32t8:u32 = R_EAX:u32
+T_32t9:u32 = R_EDX:u32
+T_64t7:u64 = pad:u64(T_32t9:u32) << 0x20:u64 | pad:u64(T_32t8:u32)
+T_64t4:u64 =
+  T_64t7:u64 $% extend:u64(T_32t2:u32) << 0x20:u64 & 0xffffffff00000000:u64 |
+  T_64t7:u64 $/ extend:u64(T_32t2:u32) & 0xffffffff:u64
+T_32t10:u32 = low:u32(T_64t4:u64)
+R_EAX:u32 = T_32t10:u32
+T_32t11:u32 = high:u32(T_64t4:u64)
+R_EDX:u32 = T_32t11:u32
+goal:bool = T_32t2:u32 <> 0:u32
+`

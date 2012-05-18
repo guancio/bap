@@ -1,0 +1,187 @@
+REMEBER TO COMPILE WITH
+gcc -c source.c -m32 -o out.o
+
+* Checking SQRT loop invariant
+1) sqrt.c is the whole source
+2) sqrt.o is the compiled assempler
+3) sqrt.il is the IL lift
+** Separate the body of the while from the rest
+Two strategies: separate (manually) the assemply or separate
+the IL
+
+We choose to separate the IL
+
+the file body.il contains the while IL body
+(from 0x21 to 0x3a)
+
+** Define the loop invariant IL
+{C and I} Body {I}
+Where C is the loop condition
+
+I = y >= 0
+
+Who is y in the assemply? Since it is not optimized
+y is the memory at position -0x8(%ebp)
+So the invariant is
+mem:?u32[R_EBP:u32 + -8:u32, e_little]:u32 >= 0:u32
+
+To avoid problems with reassigment in the memory
+We use a ghost variable at the end of the while body
+
+goal:bool = mem:?u32[R_EBP:u32 + -8:u32, e_little]:u32 >= 0:u32
+
+We evaluate the wekest precondition of the invariant
+
+~/Downloads/bap-0.4/utils/topredicate -il body.il -post goal
+
+To obtain the STP
+
+~/Downloads/bap-0.4/utils/topredicate -il body.il -stp-out body.stp -post goal
+
+** Proving the invariant
+We need to prove that I and C => WP
+in STP ths is done
+
+assert(I and C)
+query(WP)
+
+The code is inside ilproof.stp
+
+Since we are in a non optimzed assemply we assume that all C variables are stored into
+memory
+
+sq is in -0x4(%ebp)
+y is in -0x8(%ebp)
+x is 0x8(%ebp)
+
+*** Problems:
+1) body.stp contain unsigned comparison between y and 0. We wand signed comparison
+Ho is possible to del with signed comparison or signed values?
+You have to use $>= look into pp.ml
+
+The right loop invariant is now:
+goal:bool = mem:?u32[R_EBP + -8:u32, e_little]:u32 $>= 0:u32
+
+Results in ilproof.stp and fails, since y can reach max_int
+
+
+REMEMBER compile with  -m32
+
+the file corrected body.il contains the while IL body
+(from 0x21 to 0x3a)
+
+
+** Find the wekest precondition of the last part of the method
+the last part is bounded by the addresses [0x48, 0x4c]
+
+postcondition is
+goal:bool = R_EAX:u32 $>= 0:u32
+
+remember to put the postcondition before the jump
+
+We prove that the invariant and not(while condition) => wp(end)
+
+** Find the wekest precondition of the first part of the method
+the last part is bounded by the addresses [0, 0x1c]
+
+postcondition is
+goal:bool = mem:?u32[R_EBP + -8:u32, e_little]:u32 $>= 0:u32
+
+We prove that the invariant and not(while condition) => wp(end)
+
+
+* Second attempt: real loop invariant
+** wpC = WP(C, (r*r) <= x < (r+1)*(r+1))
+Invariant: 
+goal:bool = (R_EAX:u32*R_EAX:u32) $<=  mem:?u32[R_ESP:u32+8:u32, e_little]:u32 & ((R_EAX:u32+1:u32)*(R_EAX:u32+1:u32)) $>  mem:?u32[R_ESP:u32+8:u32, e_little]:u32
+
+** While loop
+NotWhileCondition and I => wpC
+// sq > x &
+// I: sq = (y+1)*(y+1) and y*y<=x  => 
+// wp: (y*y) <= x < (y+1)*(y+1)
+
+We use Invariant y*y<=x
+1) NotWhileCondition and I => wpC (end.stp)
+2) wpB = WP(WhileBody, I) (asm 21 to 3a)
+   goal:bool = ( mem:?u32[R_EBP:u32 + -4:u32, e_little]:u32 == ( mem:?u32[R_EBP:u32 + -8:u32, e_little]:u32 + 1:u32) * ( mem:?u32[R_EBP:u32 + -8:u32, e_little]:u32 + 1:u32)) & ( mem:?u32[R_EBP:u32 + -8:u32, e_little]:u32) * ( mem:?u32[R_EBP:u32 + -8:u32, e_little]:u32) $<= ( mem:?u32[R_EBP:u32 + 8:u32, e_little]:u32)
+3) WhileCondition and I => wpB (body.stp)
+
+** Prove the part A
+1) wpA = WP(A, I)
+2) pre => wpA (pre.stp)
+
+* Proving abs(x)
+I remove the last assemply istruction since it is a jump to return address
+1) wp = WP(code, post)
+   goal:bool = (R_EAX:u32 $>= 0:u32)
+2) true => wp (abs.stp)
+
+We have to check arithmetic under/overflow for -x
+
+* Proving main(x)
+We do not write nice postcondition on the result since it is time consuming
+We just check that the function work and that the result is smaller or equal
+to the input paramteter
+
+Strategy:
+1) evaluate the WP# of main3
+2) manually generate WP2 using WP3
+   WP2 = (sqrt1.pre) and (forall x . (sqrt[x/return] => WP3[x/assigned_result]) )
+
+   WP2 = (p>=0) and (forall x. (x*x<=p and (x+1)*(x+1) > p) => WP3[x/assigned_result])
+   
+
+we will quantify on free variable freevar1
+
+paddr:u32 = mem:?u32[R_ESP:u32, e_little]:u32
+pvalue:u32 = mem:?u32[paddr:u32, e_little]:u32
+sqrtpre:bool = pvalue $>= 0:u32
+notpost:bool = ~(freevar1*freevar1 $<= pvalue & (freevar+1:u32)*(freevar+1:u32) $> pvalue)
+wpsubs:bool = let R_EAX:u32:= freevar1 in
+let temp:u32 := R_ESP:u32 + 0x1c:u32 in
+let mem:?u32 := mem_47:?u32 with [temp:u32, e_little]:u32 = R_EAX:u32 in
+let R_EAX_75:u32 := mem:?u32[temp:u32, e_little]:u32 in
+let wp3:bool :=
+                  0:u32 $<= R_EAX_75:u32 &
+                  R_EAX_75:u32 * R_EAX_75:u32 * R_EAX_75:u32 * R_EAX_75:u32 $<=
+                  param:u32 in wp3:bool
+goal:bool = sqrtpre & (notpost | wpsubs)
+
+Use this goal as postcondition for istructions for 14 to 1c
+
+
+WP1 = (abs1.pre) and (forall x . (abs.post[x/return] => WP2[x/assigned_result]) )
+WP1 = (p>max_neg_int) and (forall x. (x>=0) => WP2[x/assigned_result])
+
+
+pabsaddr:u32 = mem:?u32[R_ESP:u32, e_little]:u32
+pabsvalue:u32 = mem:?u32[paddr:u32, e_little]:u32
+abspre:bool = pabsvalue $> 0x10000000:u32
+notabspost:bool = ~(freevar2 $>=0:u32)
+wp2subst:bool = let R_EAX:u32:= freevar2 in
+let temp:u32 := R_ESP:u32 + 0x18:u32 in
+let mem:?u32 := mem_47:?u32 with [temp:u32, e_little]:u32 = R_EAX:u32 in
+let R_EAX_87:u32 := mem:?u32[temp:u32, e_little]:u32 in
+let mem_88:?u32 := mem:?u32 with [R_ESP:u32, e_little]:u32 = R_EAX_87:u32 in
+let paddr:u32 := mem_88:?u32[R_ESP:u32, e_little]:u32 in
+let pvalue:u32 := mem_88:?u32[paddr:u32, e_little]:u32 in
+let sqrtpre:bool := 0:u32 $<= pvalue:u32 in
+let temp_94:u32 := freevar1:u32 + 1:u32 in
+let notpost:bool :=
+                     ~(freevar1:u32 * freevar1:u32 $<= pvalue:u32 &
+                      pvalue:u32 $< temp_94:u32 * temp_94:u32)
+                     in
+let temp_101:u32 := R_ESP:u32 + 0x1c:u32 in
+let mem_102:?u32 :=
+                     mem_47_78:?u32 with [temp_101:u32, e_little]:u32 =
+                     freevar1:u32 in
+let R_EAX_75:u32 := mem_102:?u32[temp_101:u32, e_little]:u32 in
+let wp3:bool :=
+                 0:u32 $<= R_EAX_75:u32 &
+                 R_EAX_75:u32 * R_EAX_75:u32 * R_EAX_75:u32 * R_EAX_75:u32 $<=
+                 param:u32 in
+let goal:bool := sqrtpre:bool & (notpost:bool | wp3:bool) in goal:bool
+goal:bool = abspre & (notabspost | wp2subst)
+
+use goal as postcondition of lines from 0 to c

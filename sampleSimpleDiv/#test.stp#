@@ -1,0 +1,50 @@
+% free variables:
+R_EBP_0 : BITVECTOR(32);
+R_EAX_5 : BITVECTOR(32);
+R_EDX_8 : BITVECTOR(32);
+mem_103 : ARRAY BITVECTOR(32) OF BITVECTOR(8);
+% end free variables.
+
+ASSERT(
+0bin1 =
+(LET T_32t5_82_0 = BVPLUS(32, R_EBP_0,0hex00000018) IN
+(LET T_32t2_83_1 =
+                    (LET loadnorm_104_2 = mem_103 IN
+                    ((((0bin000000000000000000000000 @ loadnorm_104_2[
+                                                       BVPLUS(32, T_32t5_82_0,
+                                                       0hex00000000)])|
+                      (((0bin000000000000000000000000 @ loadnorm_104_2[
+                                                        BVPLUS(32, T_32t5_82_0,
+                                                        0hex00000001)]) << 8)[31:0]))|
+                     (((0bin000000000000000000000000 @ loadnorm_104_2[
+                                                       BVPLUS(32, T_32t5_82_0,
+                                                       0hex00000002)]) << 16)[31:0]))|
+                    (((0bin000000000000000000000000 @ loadnorm_104_2[
+                                                      BVPLUS(32, T_32t5_82_0,
+                                                      0hex00000003)]) << 24)[31:0])))
+                    IN
+(LET T_64t7_89_3 =
+                    ((((0bin00000000000000000000000000000000 @ R_EDX_8) << 32)[63:0])|
+                    (0bin00000000000000000000000000000000 @ R_EAX_5)) IN
+(LET temp_90_4 = SX(T_32t2_83_1, 64) IN
+(LET T_64t4_97_5 =
+                    ((((SBVMOD(64, T_64t7_89_3,temp_90_4) << 32)[63:0])&
+                     0hexffffffff00000000)|
+                    (SBVDIV(64, T_64t7_89_3,temp_90_4)&0hex00000000ffffffff)) IN
+(LET T_32t10_98_6 = T_64t4_97_5[31:0] IN
+(LET goal_102_7 =
+                   IF (BVLT(0hex00000000,
+                   T_32t10_98_6)) THEN 0bin1 ELSE 0bin0 ENDIF IN
+goal_102_7)))))))
+);
+QUERY(FALSE);
+COUNTEREXAMPLE;
+
+
+
+
+mem:?u32[T_R_EBP:u32+0x18:u32, e_little] <> 0
+
+
+
+x:= x

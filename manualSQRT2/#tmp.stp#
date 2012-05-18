@@ -1,0 +1,75 @@
+	R_ESP_1  : BITVECTOR(32);
+	mem_174  : ARRAY BITVECTOR(32) OF BITVECTOR(8);
+	R_EBP_0  : BITVECTOR(32);
+	ASSERT( TRUE );
+	QUERY((LET let_k_0 = BVSUB(32, 
+	R_ESP_1, 
+	0x00000004)
+	,
+	let_k_1 = ((((mem_174 WITH [BVPLUS(32, 
+	0x00000003, 
+	let_k_0)
+	] := (0x000000 @ R_EBP_0[31:24]
+	)[7:0])
+	 WITH [BVPLUS(32, 
+	 0x00000002, 
+	 let_k_0)
+	 ] := (0x0000 @ R_EBP_0[31:16]
+	 )[7:0])
+	  WITH [BVPLUS(32, 
+	  0x00000001, 
+	  let_k_0)
+	  ] := (0x00 @ R_EBP_0[31:8]
+	  )[7:0])
+	   WITH [BVPLUS(32, 
+	   0x00000000, 
+	   let_k_0)
+	   ] := R_EBP_0[7:0])
+	   ,
+	   let_k_2 = BVPLUS(32, 
+	   0x00000008, 
+	   let_k_0)
+	   ,
+	   let_k_3 = ((((0x000000 @ let_k_1[BVPLUS(32, 
+	   0x00000000, 
+	   let_k_2)
+	   ]
+	   ) | ((0x000000 @ let_k_1[BVPLUS(32, 
+	   0x00000001, 
+	   let_k_2)
+	   ]
+	   ) @ 0x00
+	   )[31:0]
+	   ) | ((0x000000 @ let_k_1[BVPLUS(32, 
+	   0x00000002, 
+	   let_k_2)
+	   ]
+	   ) @ 0x0000
+	   )[31:0]
+	   ) | ((0x000000 @ let_k_1[BVPLUS(32, 
+	   0x00000003, 
+	   let_k_2)
+	   ]
+	   ) @ 0x000000
+	   )[31:0]
+	   ),
+	   let_k_4 = ( ~( ( ~( BVSUB(32, 
+	   let_k_3, 
+	   0x00000000)
+	   [31:31])))) IN 
+	   ( NOT( (0b1 = ((let_k_4 | IF(SBVLE(0x00000000,let_k_3)
+	   )
+	   THEN 0b1
+	   ELSE 0b0
+	   ENDIF
+	   ) & (( ~( let_k_4)) | IF(SBVLE(0x00000000,BVSUB(32, 
+	   0x00000000, 
+	   let_k_3)
+	   )
+	   )
+	   THEN 0b1
+	   ELSE 0b0
+	   ENDIF
+	   )
+	   )
+	   ))))  );

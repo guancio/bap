@@ -1,0 +1,7 @@
+#!/bin/sh
+
+gcc -m32 -c -g sqrt.c -o sqrt.o
+~/Downloads/bap-0.4/utils/toil -bin sqrt.o -o sqrt.il
+echo "goal:bool = R_EAX:u32>=0:u32" >> sqrt.il
+
+# ~/Downloads/bap-0.4/utils/topredicate -il test.il  -post goal R_EAX:u32

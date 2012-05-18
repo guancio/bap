@@ -1,0 +1,33 @@
+% free variables:
+R_EBP_0 : BITVECTOR(32);
+R_EAX_5 : BITVECTOR(32);
+
+x : BITVECTOR(32);
+
+ASSERT(
+  R_EAX_5 = 0x00000002
+);
+ASSERT(
+  x = BVMULT(32, R_EBP_0, R_EAX_5)
+);
+QUERY(
+	0bin1 = IF x = R_EBP_0 THEN 0bin0 ELSE 0bin1 ENDIF
+	OR
+	R_EBP_0 = 0x00000000 
+);
+COUNTEREXAMPLE;
+
+pre (
+    x >= 0
+)
+r = sqrt(x)
+post (
+    r*r <= x and (r+1)*(r+1) > x 
+)
+
+
+1 Write SQRT using C ----> out.c
+2 we compile SQRTY to ARM/X86
+3 we compile ASM to IL
+4 we synthetyze wekest precondition
+

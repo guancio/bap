@@ -1,0 +1,9 @@
+int sqrt(int x) {
+  int y = 0;
+  int sq = y*y;
+  do {
+    y +=1;
+    int sq = y*y;
+  } while (sq < x);
+  return y-1;
+}
