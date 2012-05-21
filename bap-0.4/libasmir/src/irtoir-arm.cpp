@@ -158,8 +158,13 @@ Exp  *arm_translate_ccall( IRExpr *expr, IRSB *irbb, vector<Stmt *> *irout )
 {
   string func = string(expr->Iex.CCall.cee->name);
 
+  Temp *R1 = mk_reg("R1", REG_1);
+  Exp *result = ecl(R1);
+  result = _ex_u_cast(result, REG_32);
+  delete R1;
 
-  return new Unknown("CCall: " + func, regt_of_irexpr(irbb, expr));
+  return result;
+  //return new Unknown("CCall: " + func, regt_of_irexpr(irbb, expr));
 }
 
 void  arm_modify_flags( asm_program_t *prog, bap_block_t *block )
