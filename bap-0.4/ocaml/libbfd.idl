@@ -14,13 +14,21 @@ enum bfd_architecture
   bfd_arch_m68k,      /* Motorola 68xxx */
   bfd_arch_vax,       /* DEC Vax */
   bfd_arch_i960,      /* Intel 960 */
+    /* The order of the following is important.
+       lower number indicates a machine type that
+       only accepts a subset of the instructions
+       available to machines with higher numbers.
+       The exception is the "ca", which is
+       incompatible with all other machines except
+       "core".  */
+
   bfd_arch_or32,      /* OpenRISC 32 */
+
   bfd_arch_sparc,     /* SPARC */
   bfd_arch_spu,       /* PowerPC SPU */
   bfd_arch_mips,      /* MIPS Rxxxx */
   bfd_arch_i386,      /* Intel 386 */
   bfd_arch_l1om,   /* Intel L1OM */
-  bfd_arch_k1om,
   bfd_arch_we32k,     /* AT&T WE32xxx */
   bfd_arch_tahoe,     /* CCI/Harris Tahoe */
   bfd_arch_i860,      /* Intel 860 */
@@ -51,7 +59,6 @@ enum bfd_architecture
   bfd_arch_tic30,     /* Texas Instruments TMS320C30 */
   bfd_arch_tic4x,     /* Texas Instruments TMS320C3X/4X */
   bfd_arch_tic54x,    /* Texas Instruments TMS320C54X */
-  bfd_arch_tic6x,     /* Texas Instruments TMS320C6X */
   bfd_arch_tic80,     /* TI TMS320c80 (MVP) */
   bfd_arch_v850,      /* NEC V850 */
   bfd_arch_arc,       /* ARC Cores */
@@ -68,13 +75,13 @@ enum bfd_architecture
   bfd_arch_ip2k,      /* Ubicom IP2K microcontrollers. */
   bfd_arch_iq2000,     /* Vitesse IQ2000.  */
   bfd_arch_mt,
+  bfd_arch_pj,
   bfd_arch_avr,       /* Atmel AVR microcontrollers.  */
   bfd_arch_bfin,        /* ADI Blackfin */
   bfd_arch_cr16,       /* National Semiconductor CompactRISC (ie CR16). */
   bfd_arch_cr16c,       /* National Semiconductor CompactRISC. */
   bfd_arch_crx,       /*  National Semiconductor CRX.  */
   bfd_arch_cris,      /* Axis CRIS */
-  bfd_arch_rx,        /* Renesas RX.  */
   bfd_arch_s390,      /* IBM s390 */
   bfd_arch_score,     /* Sunplus score */ 
   bfd_arch_openrisc,  /* OpenRISC */
@@ -83,6 +90,7 @@ enum bfd_architecture
   bfd_arch_msp430,    /* Texas Instruments MSP430 architecture.  */
   bfd_arch_xc16x,     /* Infineon's XC16X Series.               */
   bfd_arch_xtensa,    /* Tensilica's Xtensa cores.  */
+  bfd_arch_maxq,     /* Dallas MAXQ 10/20 */
   bfd_arch_z80,
   bfd_arch_lm32,      /* Lattice Mico32 */
   bfd_arch_microblaze,/* Xilinx MicroBlaze. */
