@@ -143,6 +143,7 @@ struct
     let fold_succ_e  x y = G'.fold_succ_e x y.g
     let iter_pred_e  x y = G'.iter_pred_e x y.g
     let fold_pred_e  x y = G'.fold_pred_e x y.g
+    let find_all_edges x y z = G'.find_all_edges x.g y z
 
 
     let add_edge c v1 v2    = { c with g = G'.add_edge c.g v1 v2 }
