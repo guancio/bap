@@ -5,7 +5,6 @@ int abs1(int x) {
   return x;
 }
 // post: r >= 0 and (r<=x | r <= -x)
-/*
 
 // pre x >= 0
 int sqrt1(int x) {
@@ -41,4 +40,3 @@ int main1(int x) {
   return z;
 }
 // post: r >= 0 & r*r*r*r <= x*x
-*/
