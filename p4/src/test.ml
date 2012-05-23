@@ -12,10 +12,8 @@ let tocheck =
      "param:u32 = mem:?u32[R_ESP:u32+4:u32, e_little]:u32 \n \
        mem1:?u32 = mem \n \
        oldESP:u32 = R_ESP:u32", (* Old state save*)
-     "param $> 0x80000000:u32 & \
-       oldESP $>10:u32 & oldESP $<0xffff:u32",  (* Preconditions *)
-     "(R_EAX:u32 $>= 0:u32) & (R_EAX:u32 $<= param | R_EAX:u32 $<= -param) & \
-       ((anyaddr:u32 >= oldESP-4:u32 & anyaddr:u32 < oldESP-4:u32+4:u32) |( mem[anyaddr, e_little]:u8 == mem1[anyaddr, e_little]:u8))
+     "param $> 0x80000000:u32",  (* Preconditions *)
+     "(R_EAX:u32 $>= 0:u32) & (R_EAX:u32 $<= param | R_EAX:u32 $<= -param)
      " (* Postconditions *),
                                (* Unit blocks *)
       ("S", 0, 0x14, "", "")::                 (* start-end *)
@@ -23,26 +21,36 @@ let tocheck =
      ) ::
     ("sqrt1", 
      "xparam:u32 = mem:?u32[R_EBP:u32+8:u32, e_little]:u32 \n \
-	       yparam:u32 = mem:?u32[R_EBP:u32-8:u32, e_little]:u32 \n \
-	       sqparam:u32 =  mem:?u32[R_EBP:u32-4:u32, e_little]:u32 \n \
-	       mem1:?u32 = mem",
+      yparam:u32 = mem:?u32[R_EBP:u32-8:u32, e_little]:u32 \n \
+      sqparam:u32 =  mem:?u32[R_EBP:u32-4:u32, e_little]:u32 \n \
+      mem1:?u32 = mem",
      "xparam $>= 0:u32",
      "
-	        (R_EAX:u32 $>= 0:u32) & \
 	        (R_EAX * R_EAX $<= xparam) & \
-		((R_EAX+1:u32) * (R_EAX+1:u32) $> xparam) & \
-		(mem[anyaddr:u32, e_little]:u8 == mem1[anyaddr, e_little]:u8)
-	       ",
+		((R_EAX+1:u32) * (R_EAX+1:u32) $> xparam)
+     ",
+     (*
      ("S", 0x15, 0x31, "", "") ::
+     *)
      ("W", 0x36, 0x4f,
-          "sqparam $<= xparam",
-	  "(yparam*yparam $<= xparam) &
-	   (sqparam == (yparam+1:u32)*(yparam+1:u32)) &
-	   (yparam $> 0:u32)
+          "mem:?u32[R_EBP:u32-4:u32, e_little]:u32 $<= xparam",
+	  " (let yvalue:u32 :=  mem:?u32[R_EBP:u32-8:u32, e_little]:u32 in
+            let sqvalue:u32 := mem:?u32[R_EBP:u32-4:u32, e_little]:u32 in
+            (yvalue*yvalue $<= xparam) &
+	    (sqvalue == (yvalue+1:u32)*(yvalue+1:u32))
+            )
 	  "
      ) ::
-     ("S", 0x54, 0x58, "", "") :: []) ::
+     ("S", 0x54, 0x58, "", "") ::
+     []) ::
+
 (*
+	        (R_EAX:u32 $>= 0:u32) & \
+
+	    (yvalue $>= 0:u32) &
+            (yvalue $<= 0x0000b504:u32) &
+            (R_EBP == 0x8:u32)
+
     ("main1", 1, 2, "", "pre", "post") ::
 *)
     [];;
