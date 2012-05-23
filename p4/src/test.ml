@@ -20,24 +20,23 @@ let tocheck =
       (0, 0x14)::                 (* start-end *)
       []
      ) ::
-(*
-    ("sqrt1", 0x54, 0x58,
-    	      "xparam:u32 = mem:?u32[R_EBP:u32+8:u32, e_little]:u32 \n \
+    ("sqrt1", 
+     "xparam:u32 = mem:?u32[R_EBP:u32+8:u32, e_little]:u32 \n \
 	       yparam:u32 = mem:?u32[R_EBP:u32-8:u32, e_little]:u32 \n \
 	       sqparam:u32 =  mem:?u32[R_EBP:u32-4:u32, e_little]:u32 \n \
 	       mem1:?u32 = mem",
-	       "(yparam*yparam $<= xparam) &
+     "(yparam*yparam $<= xparam) &
 	        (sqparam == (yparam+1:u32)*(yparam+1:u32)) &
 		(yparam $> 0:u32) &
 		(sqparam $> xparam)
 	       ",
-	       "
+     "
 	        (R_EAX:u32 $>= 0:u32) & \
 	        (R_EAX * R_EAX $<= xparam) & \
 		((R_EAX+1:u32) * (R_EAX+1:u32) $> xparam) & \
 		(mem[anyaddr:u32, e_little]:u8 == mem1[anyaddr, e_little]:u8)
-	       ") ::
-*)
+	       ",
+     (0x54, 0x58) :: []) ::
 (*
     ("main1", 1, 2, "", "pre", "post") ::
 *)
