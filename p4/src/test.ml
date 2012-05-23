@@ -6,6 +6,7 @@ open Printf;;
 let bap_path = "../../bap-0.4/utils/";;
 let stp_path = "../../stp/bin/";;
 
+
 let tocheck =
     ("abs1", (* function name *)
      "param:u32 = mem:?u32[R_ESP:u32+4:u32, e_little]:u32 \n \
@@ -17,7 +18,7 @@ let tocheck =
        ((anyaddr:u32 >= oldESP-4:u32 & anyaddr:u32 < oldESP-4:u32+4:u32) |( mem[anyaddr, e_little]:u8 == mem1[anyaddr, e_little]:u8))
      " (* Postconditions *),
                                (* Unit blocks *)
-      (0, 0x14)::                 (* start-end *)
+      ("S", 0, 0x14, "", "")::                 (* start-end *)
       []
      ) ::
     ("sqrt1", 
@@ -25,18 +26,22 @@ let tocheck =
 	       yparam:u32 = mem:?u32[R_EBP:u32-8:u32, e_little]:u32 \n \
 	       sqparam:u32 =  mem:?u32[R_EBP:u32-4:u32, e_little]:u32 \n \
 	       mem1:?u32 = mem",
-     "(yparam*yparam $<= xparam) &
-	        (sqparam == (yparam+1:u32)*(yparam+1:u32)) &
-		(yparam $> 0:u32) &
-		(sqparam $> xparam)
-	       ",
+     "xparam $>= 0:u32",
      "
 	        (R_EAX:u32 $>= 0:u32) & \
 	        (R_EAX * R_EAX $<= xparam) & \
 		((R_EAX+1:u32) * (R_EAX+1:u32) $> xparam) & \
 		(mem[anyaddr:u32, e_little]:u8 == mem1[anyaddr, e_little]:u8)
 	       ",
-     (0x54, 0x58) :: []) ::
+     ("S", 0x15, 0x31, "", "") ::
+     ("W", 0x36, 0x4f,
+          "sqparam $<= xparam",
+	  "(yparam*yparam $<= xparam) &
+	   (sqparam == (yparam+1:u32)*(yparam+1:u32)) &
+	   (yparam $> 0:u32)
+	  "
+     ) ::
+     ("S", 0x54, 0x58, "", "") :: []) ::
 (*
     ("main1", 1, 2, "", "pre", "post") ::
 *)
@@ -64,7 +69,7 @@ let bap_topredicate name =
   Sys.command (bap_path ^ "topredicate -il ../tests/processing/" ^ name^ ".il -post goal -stp-out ../tests/processing/" ^ name^ ".stp");
 ;;
 let stp_prove name =
-  Sys.command (stp_path ^ "stp ../tests/processing/" ^ name^ "2.stp");
+  Sys.command (stp_path ^ "stp ../tests/processing/" ^ name^ "_2.stp");
 ;;
 
 let rec filter_il_block il currline (minline, maxline) =
@@ -98,24 +103,54 @@ let stp_assert_to_query stp_code =
 let main () =
   bap_toil;
   let ilcode = read_lines "../tests/example.il" in
-  let check_func func_desc = 
-    match func_desc with (name, statesave, pre, post, blocks) ->
-
-    let check_block name statesave pre post (startline, endline) =
-      let il_block = sprintf "%s\n" statesave ::
-                     sprintf "precondition:bool = (%s)\n" pre ::
+  let check_func (name, statesave, pre, post, blocks) = 
+    let rec check_block name count statesave pre post blocks =
+      match blocks with
+        [] -> true
+      | ("S", startline, endline, "", "") :: rs ->
+              let block_pre =
+                  match rs with
+                     [] -> pre
+                   | ("W", startline, endline, condition, invariant) :: _ -> sprintf "(~(%s) & (%s))" condition invariant
+                   | _ -> print_string "***************** UNSUPPORTED *****************\n"; "true"
+              in
+              let il_block = sprintf "%s\n" statesave ::
+                     sprintf "precondition:bool = (%s)\n" block_pre ::
                      filter_il_block ilcode 0 (startline, endline) @
                      (sprintf "\ngoal:bool = (~precondition | %s)\n" post ::
                      []) in
-      write_lines ("../tests/processing/" ^ name ^ ".il") il_block;
-      bap_topredicate name;
-      let stp_code = read_lines ("../tests/processing/"^ name ^ ".stp") in
-      let stp_code = stp_assert_to_query stp_code in
-      write_lines ("../tests/processing/" ^ name ^ "2.stp") stp_code;
-      stp_prove name;
-      true
+              let il_block_name = name ^ (string_of_int count) in
+              let il_block_path = "../tests/processing/" ^ il_block_name ^ ".il" in
+              let stp_block_path = "../tests/processing/"^ il_block_name ^ ".stp" in
+              let stp_patched_path = "../tests/processing/"^ il_block_name ^ "_2.stp" in
+              write_lines il_block_path il_block;
+              bap_topredicate il_block_name;
+              let stp_code = read_lines stp_block_path in
+              let stp_code = stp_assert_to_query stp_code in
+              write_lines stp_patched_path stp_code;
+              stp_prove il_block_name;
+              check_block name (count+1) statesave pre "true" rs
+      | ("W", startline, endline, condition, invariant) :: rs ->
+              let block_pre = sprintf "((%s) & (%s))" condition invariant in
+              let il_block = sprintf "%s\n" statesave ::
+                     sprintf "precondition:bool = (%s)\n" block_pre ::
+                     filter_il_block ilcode 0 (startline, endline) @
+                     (sprintf "\ngoal:bool = (~precondition | %s)\n" invariant ::
+                     []) in
+              let il_block_name = name ^ (string_of_int count) in
+              let il_block_path = "../tests/processing/" ^ il_block_name ^ ".il" in
+              let stp_block_path = "../tests/processing/"^ il_block_name ^ ".stp" in
+              let stp_patched_path = "../tests/processing/"^ il_block_name ^ "_2.stp" in
+              write_lines il_block_path il_block;
+              bap_topredicate il_block_name;
+              let stp_code = read_lines stp_block_path in
+              let stp_code = stp_assert_to_query stp_code in
+              write_lines stp_patched_path stp_code;
+              stp_prove il_block_name;
+              check_block name (count+1) statesave pre invariant rs
+      | _ -> print_string "***************** UNSUPPORTED *****************\n"; false
     in
-      check_block name statesave pre post (List.hd blocks)
+      check_block name 1 statesave pre post (List.rev blocks)
   in
     List.map check_func tocheck; 
     ();;
