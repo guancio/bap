@@ -9,33 +9,38 @@ let stp_path = "../../stp/bin/";;
 
 let tocheck =
     ("abs1", (* function name *)
-     "param:u32 = mem:?u32[R_ESP:u32+4:u32, e_little]:u32 \n \
-      oldESP:u32 = R_ESP:u32", (* Old state save*)
      "param $> 0x80000000:u32",  (* Preconditions *)
      "(R_EAX:u32 $>= 0:u32) & (R_EAX:u32 $<= param | R_EAX:u32 $<= -param)
      " (* Postconditions *),
                                (* Unit blocks *)
-      ("S", 0, 0x14, "", "")::                 (* start-end *)
+      ("S", 0, 0x14,
+       "param:u32 = mem:?u32[R_ESP:u32+4:u32, e_little]:u32 \n \
+        oldESP:u32 = R_ESP:u32", (* Old state save*)
+       "", "")::                 (* start-end *)
       []
      ) ::
     ("sqrt1", 
-     "xparam:u32 = mem:?u32[R_EBP:u32+8:u32, e_little]:u32",
      "xparam $>= 0:u32",
      "
 	        (R_EAX * R_EAX $<= xparam) & \
 		((R_EAX+1:u32) * (R_EAX+1:u32) $> xparam)
      ",
-     ("S", 0x15, 0x31, "", "") ::
+     ("S", 0x15, 0x31,
+      "xparam:u32 = mem:?u32[R_ESP:u32+8:u32, e_little]:u32",
+      "", "") ::
      ("W", 0x36, 0x4f,
-          "mem:?u32[R_EBP:u32-4:u32, e_little]:u32 $<= xparam",
-	  " (let yvalue:u32 :=  mem:?u32[R_EBP:u32-8:u32, e_little]:u32 in
+      "xparam:u32 = mem:?u32[R_EBP:u32+8:u32, e_little]:u32",
+      "mem:?u32[R_EBP:u32-4:u32, e_little]:u32 $<= xparam",
+      " (let yvalue:u32 :=  mem:?u32[R_EBP:u32-8:u32, e_little]:u32 in
             let sqvalue:u32 := mem:?u32[R_EBP:u32-4:u32, e_little]:u32 in
             (yvalue*yvalue $<= xparam) &
 	    (sqvalue == (yvalue+1:u32)*(yvalue+1:u32))
             )
 	  "
      ) ::
-     ("S", 0x54, 0x58, "", "") ::
+     ("S", 0x54, 0x58,
+      "xparam:u32 = mem:?u32[R_EBP:u32+8:u32, e_little]:u32",
+      "", "") ::
      []) ::
 
 (*
@@ -105,15 +110,15 @@ let stp_assert_to_query stp_code =
 let main () =
   bap_toil;
   let ilcode = read_lines "../tests/example.il" in
-  let check_func (name, statesave, pre, post, blocks) = 
-    let rec check_block name count statesave pre post blocks =
+  let check_func (name, pre, post, blocks) = 
+    let rec check_block name count pre post blocks =
       match blocks with
         [] -> true
-      | ("S", startline, endline, "", "") :: rs ->
+      | ("S", startline, endline, statesave, "", "") :: rs ->
               let block_pre =
                   match rs with
                      [] -> pre
-                   | ("W", startline, endline, condition, invariant) :: _ -> sprintf "(~(%s) & (%s))" condition invariant
+                   | ("W", startline, endline, statesave, condition, invariant) :: _ -> sprintf "(~(%s) & (%s))" condition invariant
                    | _ -> print_string "***************** UNSUPPORTED *****************\n"; "true"
               in
               let il_block = sprintf "%s\n" statesave ::
@@ -131,8 +136,8 @@ let main () =
               let stp_code = stp_assert_to_query stp_code in
               write_lines stp_patched_path stp_code;
               stp_prove il_block_name;
-              check_block name (count+1) statesave pre "true" rs
-      | ("W", startline, endline, condition, invariant) :: rs ->
+              check_block name (count+1) pre "true" rs
+      | ("W", startline, endline, statesave, condition, invariant) :: rs ->
               let block_pre = sprintf "((%s) & (%s))" condition invariant in
               let il_block = sprintf "%s\n" statesave ::
                      sprintf "precondition:bool = (%s)\n" block_pre ::
@@ -149,10 +154,10 @@ let main () =
               let stp_code = stp_assert_to_query stp_code in
               write_lines stp_patched_path stp_code;
               stp_prove il_block_name;
-              check_block name (count+1) statesave pre invariant rs
+              check_block name (count+1) pre invariant rs
       | _ -> print_string "***************** UNSUPPORTED *****************\n"; false
     in
-      check_block name 1 statesave pre post (List.rev blocks)
+      check_block name 1 pre post (List.rev blocks)
   in
     List.map check_func tocheck; 
     ();;
