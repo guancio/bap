@@ -3,8 +3,8 @@
 open Str;;
 open Printf;;
 
-let bap_path = "../../bap-0.4/utils/";;
-let stp_path = "../../stp/bin/";;
+let bap_path = "/opt/bap-0.4/utils/";;
+let stp_path = "/opt/stp-svn/bin/stp";;
 
 
 let tocheck =
