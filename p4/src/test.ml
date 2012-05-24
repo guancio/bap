@@ -4,7 +4,7 @@ open Str;;
 open Printf;;
 
 let bap_path = "/opt/bap-0.4/utils/";;
-let stp_path = "/opt/stp-svn/bin/stp";;
+let stp_path = "/opt/stp-svn/bin/";;
 
 
 let tocheck =
@@ -22,27 +22,26 @@ let tocheck =
     ("sqrt1", 
      "xparam $>= 0:u32",
      "
-	        (R_EAX * R_EAX $<= xparam) & \
-		((R_EAX+1:u32) * (R_EAX+1:u32) $> xparam)
+    	        (R_EAX * R_EAX $<= xparam) & \
+    		((R_EAX+1:u32) * (R_EAX+1:u32) $> xparam)
      ",
      ("S", 0x15, 0x31,
       "xparam:u32 = mem:?u32[R_ESP:u32+8:u32, e_little]:u32",
       "", "") ::
      ("W", 0x36, 0x4f,
       "xparam:u32 = mem:?u32[R_EBP:u32+8:u32, e_little]:u32",
-      "mem:?u32[R_EBP:u32-4:u32, e_little]:u32 $<= xparam",
-      " (let yvalue:u32 :=  mem:?u32[R_EBP:u32-8:u32, e_little]:u32 in
-            let sqvalue:u32 := mem:?u32[R_EBP:u32-4:u32, e_little]:u32 in
+      "mem:?u32[R_EBP:u32-8:u32, e_little]:u32 $<= xparam",
+      " (let yvalue:u32 :=  mem:?u32[R_EBP:u32-4:u32, e_little]:u32 in
+            let sqvalue:u32 := mem:?u32[R_EBP:u32-8:u32, e_little]:u32 in
             (yvalue*yvalue $<= xparam) &
-	    (sqvalue == (yvalue+1:u32)*(yvalue+1:u32))
+    	    (sqvalue == (yvalue+1:u32)*(yvalue+1:u32))
             )
-	  "
+    	  "
      ) ::
      ("S", 0x54, 0x58,
       "xparam:u32 = mem:?u32[R_EBP:u32+8:u32, e_little]:u32",
       "", "") ::
      []) ::
-
 (*
 	        (R_EAX:u32 $>= 0:u32) & \
 
