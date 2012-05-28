@@ -1,0 +1,15 @@
+% free variables:
+R_EAX_5 : BITVECTOR(32);
+% end free variables.
+
+ASSERT(
+  R_EAX_5=0hex00000009
+);
+
+QUERY(
+0bin1 =
+(LET R_EAX_73_0 = BVPLUS(32, R_EAX_5,0hex00000001) IN
+(LET goal_102_1 = IF (R_EAX_73_0=0hex0000000a) THEN 0bin1 ELSE 0bin0 ENDIF IN
+goal_102_1))
+);
+COUNTEREXAMPLE;

@@ -1,0 +1,6 @@
+To Compile:
+gcc -m32 -c abs.c -o abs.o
+
+toil -bin abs.o -o abs.il
+topredicate -il abs.il -stp-out abs.stp -post goal
+stp abs.stp

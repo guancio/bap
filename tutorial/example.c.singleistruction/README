@@ -1,0 +1,5 @@
+To Compile:
+as --32 main.s -o main.o
+toil -bin main.o -o main.il
+topredicate -il main.il -stp-out main.stp -post goal
+stp main.stp
