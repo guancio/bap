@@ -20,10 +20,11 @@ let tocheck =
       []
      ) ::
     ("sqrt1", 
-     "xparam $>= 0:u32",
+     "xparam $>= 0:u32 & xparam $< 0x7ffd3e09:u32",
      "
     	        (R_EAX * R_EAX $<= xparam) & \
-    		((R_EAX+1:u32) * (R_EAX+1:u32) $> xparam)
+    		((R_EAX+1:u32) * (R_EAX+1:u32) $> xparam) &
+		(R_EAX $>= 0:u32)
      ",
      ("S", 0x15, 0x31,
       "xparam:u32 = mem:?u32[R_ESP:u32+8:u32, e_little]:u32",
@@ -34,7 +35,10 @@ let tocheck =
       " (let yvalue:u32 :=  mem:?u32[R_EBP:u32-4:u32, e_little]:u32 in
             let sqvalue:u32 := mem:?u32[R_EBP:u32-8:u32, e_little]:u32 in
             (yvalue*yvalue $<= xparam) &
-    	    (sqvalue == (yvalue+1:u32)*(yvalue+1:u32))
+    	    (sqvalue == (yvalue+1:u32)*(yvalue+1:u32)) &
+	    (yvalue $>= 0:u32) &
+	    (xparam $< 0x7ffd3e09:u32) &
+            (yvalue $<= 0xb502:u32)
             )
     	  "
      ) ::
@@ -49,10 +53,28 @@ let tocheck =
             (yvalue $<= 0x0000b504:u32) &
             (R_EBP == 0x8:u32)
 
-    ("main1", 1, 2, "", "pre", "post") ::
 *)
+    ("main1",
+	"(param $> 0:u32)",
+	"R_EAX $>=0:u32",
+	("S", 0x59, 0x62, "param:u32:= mem:?u32[R_ESP:u32+8:u32, e_little]:u32", "", "") ::
+	("C", 0x65, 0x65, "let xparam:u32:= mem:?u32[R_ESP:u32, e_little]:u32 in" , "abs1", "")::
+	("S", 0x6a, 0x70, "", "", "") ::
+	("C", 0x73, 0x73, "let xparam:u32:= mem:?u32[R_ESP:u32, e_little]:u32 in" , "sqrt1", "")::
+	("S", 0x78, 0x7f, "", "", "")::
+	[]
+	)::
     [];;
 
+let find_f fname =
+  let rec in_find_f lst =
+     match lst with
+        (lfname, pre, post, blocks) :: rs ->
+  	  if lfname = fname then (lfname, pre, post, tocheck)
+	  else in_find_f rs
+  in in_find_f tocheck
+;;
+	
 
 let read_lines file_name = 
   let rec read_file channel = 
@@ -72,7 +94,8 @@ let bap_toil () =
   Sys.command (bap_path ^ "toil -bin ../tests/example.o -o ../tests/example.il")
 ;;
 let bap_topredicate name =
-  Sys.command (bap_path ^ "topredicate -il ../tests/processing/" ^ name^ ".il -post goal -stp-out ../tests/processing/" ^ name^ ".stp");
+  print_string ("predicate:" ^ name ^"\n");
+  Sys.command (bap_path ^ "topredicate -il ../tests/processing/" ^ name^ ".il -post goal -stp-out ../tests/processing/" ^ name^ ".stp -o ../tests/processing/" ^ name ^ "_wp.il");
 ;;
 let stp_prove name =
   Sys.command (stp_path ^ "stp ../tests/processing/" ^ name^ "_2.stp");
@@ -106,6 +129,23 @@ let stp_assert_to_query stp_code =
   in filter stp_code
 ;;
 
+
+let fix_free_vars pre =
+	let rec in_fix_free exp =
+		match exp with
+		  [] -> [] 
+		| line :: rs ->
+			try
+			let first_eq = Str.search_forward (Str.regexp "=") line 0 in
+			let first_mem = Str.search_forward (Str.regexp "mem") line 0 in
+			let second_mem = Str.search_forward (Str.regexp "mem") line first_eq in
+			let second_mem_end = Str.search_forward (Str.regexp ":") line second_mem in
+			let mem_name = String.sub line second_mem (second_mem_end-second_mem) in
+			(sprintf "let %s:?u32:= mem:?u32 in " mem_name) ::[]
+			with Not_found -> in_fix_free rs
+	in (in_fix_free pre) @ pre
+;;
+
 let main () =
   bap_toil;
   let ilcode = read_lines "../tests/example.il" in
@@ -118,6 +158,7 @@ let main () =
                   match rs with
                      [] -> pre
                    | ("W", startline, endline, statesave, condition, invariant) :: _ -> sprintf "(~(%s) & (%s))" condition invariant
+		   | ("C", startline, endline, statesave, fname, "") :: _ -> "true"
                    | _ -> print_string "***************** UNSUPPORTED *****************\n"; "true"
               in
               let il_block = sprintf "%s\n" statesave ::
@@ -127,15 +168,48 @@ let main () =
                      []) in
               let il_block_name = name ^ (string_of_int count) in
               let il_block_path = "../tests/processing/" ^ il_block_name ^ ".il" in
+	      let il_wp_path = "../tests/processing/" ^ il_block_name ^ "_wp.il" in
               let stp_block_path = "../tests/processing/"^ il_block_name ^ ".stp" in
               let stp_patched_path = "../tests/processing/"^ il_block_name ^ "_2.stp" in
               write_lines il_block_path il_block;
               bap_topredicate il_block_name;
-              let stp_code = read_lines stp_block_path in
-              let stp_code = stp_assert_to_query stp_code in
-              write_lines stp_patched_path stp_code;
-              stp_prove il_block_name;
-              check_block name (count+1) pre "true" rs
+	      (match rs with
+		  ("C", startline, endline, statesave, fname, "") :: others ->
+			let pre_block = read_lines il_wp_path in
+			let pre_block = fix_free_vars pre_block in
+			let pre_block = 
+				"let wpre:bool := ("  ::
+				(sprintf "let R_EAX:u32 := free_var%d:u32 in" count) ::
+				pre_block @ (") in " ::[]) in
+			
+			let (fname, fpre, fpost, blocks) =  find_f fname in
+			let fpost = Str.split (Str.regexp "\n") fpost in
+			let post_block = 
+				"let f_post:bool := (" ::
+				(sprintf "let R_EAX:u32 := free_var%d:u32 in" count) ::
+				fpost @ (") in "::[]) in
+			
+                        let fpre_block = Str.split (Str.regexp "\n") fpre in
+			let fpre_block =
+				"let f_pre:bool := (" ::
+				fpre_block @ (") in " ::[]) in
+			let wp =
+				(statesave:: [] ) @
+				pre_block @
+				post_block @
+				fpre_block	
+			in
+			let wp_str = String.concat "\n" wp in
+			let wp_str = wp_str^("(f_pre) & ((~ f_post) | wpre)") in
+			print_int (count+2);
+			check_block name (count+2) pre wp_str others
+		| _ -> 
+	              	let stp_code = read_lines stp_block_path in
+        	      	let stp_code = stp_assert_to_query stp_code in
+              		write_lines stp_patched_path stp_code;
+              		stp_prove il_block_name;
+              		check_block name (count+1) pre "true" rs
+		)
       | ("W", startline, endline, statesave, condition, invariant) :: rs ->
               let block_pre = sprintf "((%s) & (%s))" condition invariant in
               let il_block = sprintf "%s\n" statesave ::
