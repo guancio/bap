@@ -1,0 +1,118 @@
+
+\documentclass{beamer}
+\usetheme{default}
+
+\usepackage{listings}
+
+\begin{document}
+
+\begin{frame}{Modular Verification}
+
+\begin{itemize}
+  \item Manually write precondition $pr$ and postcondition $po$
+  \item Prove automatically that for a ``fucntion body''
+\[
+  pr =\Rightarrow WP(body, po)
+\]
+ \item Or
+\[
+  \vdash  WP(x:bool=pr;body, \neg x \vee po)
+  \ where \ x \not \in fv(body)
+\]
+ \item Weakest precondition of function call
+   \begin{itemize}
+     \item $C.pr$ and $C.po$ are the function pre and post conditions
+     \item $x$ is the global variable (state) changed
+     \item $y$ is the variable bound in $Q$ representing the new value of $x$
+   \end{itemize}
+\[
+ WP(call\ C) = C.pr \vee \forall z.(C.po[z/y] \Rightarrow \phi[z/x])
+\]  
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]{Open Issues: Side effects}
+\begin{itemize}
+  \item there is not local variables
+  \item all effects are global
+  \item constraint the affected memory and registers
+  \begin{lstlisting}
+memOld = mem
+pcOld = PC
+spOld = SP
+...
+(PC=pcOld+4 & SP = spOld+4) &
+(
+ freevar != spOld =>
+   memOld[freevar]=mem[freevar]
+)
+  \end{lstlisting}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Open Issues: While conditions}
+\begin{itemize}
+  \item C condition is $sq<=x$
+  \item Machine code condition is R\_ZF or R\_SF xor R\_OF
+  \item Enrich the loop invariant with
+  \begin{lstlisting}
+R_ZF or R_SF xor R_OF => (sq <= x)
+&
+~(R_ZF or R_SF xor R_OF) => (sq > x)
+  \end{lstlisting}
+  \item Prove absence of overflow
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Open Issues: While conditions}
+\begin{itemize}
+  \item C condition is $sq<=x$
+  \item Machine code condition is R\_ZF or R\_SF xor R\_OF
+  \item Enrich the loop invariant with
+  \begin{lstlisting}
+R_ZF or R_SF xor R_OF => (sq <= x)
+&
+~(R_ZF or R_SF xor R_OF) => (sq > x)
+  \end{lstlisting}
+  \item Prove absence of overflow
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Open Issues: Unstructured control flow}
+\begin{itemize}
+  \item Bap manages simple non cyclic control flow (e.g. abs)
+  \item Machine code does not have notion of functions
+  \item Machine code does not have notion of while
+  \item Formalize class of control flow that can be managed
+  \item Formalize the algorithms that must be applied
+  \item Handle indirect jumps
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Open Issues: Tools}
+\begin{itemize}
+  \item STP binary version infinitely loops (manually compiled version works)
+  \item CVC3 never terminates
+  \item BAP lifting of flag updates is non-deterministic (Debian 6 and Ubuntu 10.04 ok, Ubuntu 12.04 no). Partially solved with the option --always-vex
+  \item BAP does not support ARM
+  \begin{itemize}
+    \item arm\_translate\_ccall missing (3000 LOC)
+    \item arm\_modify\_flags missing (similar)
+    \item write a filter in ML (that is what is currently broken for x86)
+  \end{itemize}
+  \item Formalize the algorithms that must be applied
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Smaller Issues}
+\begin{itemize}
+  \item all operation exploits finite arithmetics (warning to theorem overflows)
+  \item automatically apply the verification steps and transformations 
+    (Pre and Post condition Prover for Prosper = $p^4$ prototype)
+  \item parse and transform the required structures
+  \item provides a language tailored for our purposes
+\end{itemize}
+\end{frame}
+
+\end{document}
